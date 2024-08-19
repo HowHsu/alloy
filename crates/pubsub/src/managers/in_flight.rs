@@ -1,6 +1,6 @@
 use alloy_json_rpc::{Response, ResponsePayload, SerializedRequest};
 use alloy_primitives::U256;
-use alloy_transport::{TransportError, TransportResult};
+use alloy_transport::TransportResult;
 use std::fmt;
 use tokio::sync::oneshot;
 
@@ -52,20 +52,27 @@ impl InFlight {
         &self.request
     }
 
+    fn char_to_uint(c: char) -> u32 {
+        match c {
+            '0'..='9' => c as u32 - '0' as u32,
+            'A'..='Z' => c as u32 - 'A' as u32 + 10,
+            'a'..='z' => c as u32 - 'a' as u32 + 36,
+            _ => panic!("invalid subscription id char: {}", c),
+        }
+    }
     /// Fulfill the request with a response. This consumes the in-flight
     /// request. If the request is a subscription and the response is not an
     /// error, the subscription ID and the in-flight request are returned.
     pub(crate) fn fulfill(self, resp: Response) -> Option<(U256, Self)> {
         if self.is_subscription() {
             if let ResponsePayload::Success(val) = resp.payload {
-                let sub_id: serde_json::Result<U256> = serde_json::from_str(val.get());
-                return match sub_id {
-                    Ok(alias) => Some((alias, self)),
-                    Err(e) => {
-                        let _ = self.tx.send(Err(TransportError::deser_err(e, val.get())));
-                        None
-                    }
-                };
+                let mut id = U256::ZERO;
+                let raw_val = val.get().trim_matches('"');
+
+                for ch in raw_val.chars() {
+                    id = id * U256::from(100) + U256::from(Self::char_to_uint(ch));
+                }
+                return Some((id, self));
             }
         }
 
