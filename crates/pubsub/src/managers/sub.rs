@@ -8,7 +8,7 @@ pub(crate) struct SubscriptionManager {
     /// The subscriptions.
     local_to_sub: BiBTreeMap<B256, ActiveSubscription>,
     /// Tracks the CURRENT server id for a subscription.
-    local_to_server: BiBTreeMap<B256, U256>,
+    local_to_server: BiBTreeMap<B256, String>,
 }
 
 impl SubscriptionManager {
@@ -26,7 +26,7 @@ impl SubscriptionManager {
     fn insert(
         &mut self,
         request: SerializedRequest,
-        server_id: U256,
+        server_id: String,
         channel_size: usize,
     ) -> RawSubscription {
         let active = ActiveSubscription::new(request, channel_size);
@@ -43,7 +43,7 @@ impl SubscriptionManager {
     pub(crate) fn upsert(
         &mut self,
         request: SerializedRequest,
-        server_id: U256,
+        server_id: String,
         channel_size: usize,
     ) -> RawSubscription {
         let local_id = request.params_hash();
@@ -59,7 +59,7 @@ impl SubscriptionManager {
     }
 
     /// De-alias an alias, getting the original ID.
-    pub(crate) fn local_id_for(&self, server_id: U256) -> Option<B256> {
+    pub(crate) fn local_id_for(&self, server_id: String) -> Option<B256> {
         self.local_to_server.get_by_right(&server_id).copied()
     }
 
@@ -69,7 +69,7 @@ impl SubscriptionManager {
     }
 
     /// Change the server_id of a subscription.
-    fn change_server_id(&mut self, local_id: B256, server_id: U256) {
+    fn change_server_id(&mut self, local_id: B256, server_id: String) {
         self.local_to_server.insert(local_id, server_id);
     }
 

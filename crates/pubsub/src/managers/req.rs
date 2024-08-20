@@ -30,7 +30,7 @@ impl RequestManager {
     /// If the request created a new subscription, this function returns the
     /// subscription ID and the in-flight request for conversion to an
     /// `ActiveSubscription`.
-    pub(crate) fn handle_response(&mut self, resp: Response) -> Option<(U256, InFlight)> {
+    pub(crate) fn handle_response(&mut self, resp: Response) -> Option<(String, InFlight)> {
         if let Some(in_flight) = self.reqs.remove(&resp.id) {
             return in_flight.fulfill(resp);
         }

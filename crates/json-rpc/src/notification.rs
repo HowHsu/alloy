@@ -10,7 +10,7 @@ use serde::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EthNotification<T = Box<serde_json::value::RawValue>> {
     /// The subscription ID.
-    pub subscription: U256,
+    pub subscription: String,
     /// The notification payload.
     pub result: T,
 }

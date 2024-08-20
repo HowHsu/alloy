@@ -167,11 +167,11 @@ impl<T: PubSubConnect> PubSubService<T> {
     }
 
     /// Rewrite the subscription id and insert into the subscriptions manager
-    fn handle_sub_response(&mut self, in_flight: InFlight, server_id: U256) -> TransportResult<()> {
+    fn handle_sub_response(&mut self, in_flight: InFlight, server_id: String) -> TransportResult<()> {
         let request = in_flight.request;
         let id = request.id().clone();
 
-        self.subs.upsert(request, server_id, in_flight.channel_size);
+        self.subs.upsert(request, server_id.clone(), in_flight.channel_size);
 
         // lie to the client about the sub id.
         let local_id = self.subs.local_id_for(server_id).unwrap();

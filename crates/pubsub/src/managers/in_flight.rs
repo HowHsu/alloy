@@ -55,10 +55,10 @@ impl InFlight {
     /// Fulfill the request with a response. This consumes the in-flight
     /// request. If the request is a subscription and the response is not an
     /// error, the subscription ID and the in-flight request are returned.
-    pub(crate) fn fulfill(self, resp: Response) -> Option<(U256, Self)> {
+    pub(crate) fn fulfill(self, resp: Response) -> Option<(String, Self)> {
         if self.is_subscription() {
             if let ResponsePayload::Success(val) = resp.payload {
-                let sub_id: serde_json::Result<U256> = serde_json::from_str(val.get());
+                let sub_id: serde_json::Result<String> = serde_json::from_str(val.get());
                 return match sub_id {
                     Ok(alias) => Some((alias, self)),
                     Err(e) => {
